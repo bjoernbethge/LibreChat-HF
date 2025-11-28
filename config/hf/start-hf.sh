@@ -8,22 +8,22 @@ mkdir -p /app/logs /app/uploads /app/images 2>/dev/null || true
 
 # Generate random secrets if not provided
 if [ -z "$JWT_SECRET" ]; then
-    export JWT_SECRET=$(head -c 32 /dev/urandom | xxd -p 2>/dev/null || cat /dev/urandom | tr -dc 'a-f0-9' | head -c 64)
+    export JWT_SECRET=$(head -c 32 /dev/urandom | xxd -p 2>/dev/null || head -c 100 /dev/urandom | tr -dc 'a-f0-9' | head -c 64)
     echo "Generated JWT_SECRET"
 fi
 
 if [ -z "$JWT_REFRESH_SECRET" ]; then
-    export JWT_REFRESH_SECRET=$(head -c 32 /dev/urandom | xxd -p 2>/dev/null || cat /dev/urandom | tr -dc 'a-f0-9' | head -c 64)
+    export JWT_REFRESH_SECRET=$(head -c 32 /dev/urandom | xxd -p 2>/dev/null || head -c 100 /dev/urandom | tr -dc 'a-f0-9' | head -c 64)
     echo "Generated JWT_REFRESH_SECRET"
 fi
 
 if [ -z "$CREDS_KEY" ]; then
-    export CREDS_KEY=$(head -c 32 /dev/urandom | xxd -p 2>/dev/null || cat /dev/urandom | tr -dc 'a-f0-9' | head -c 64)
+    export CREDS_KEY=$(head -c 32 /dev/urandom | xxd -p 2>/dev/null || head -c 100 /dev/urandom | tr -dc 'a-f0-9' | head -c 64)
     echo "Generated CREDS_KEY"
 fi
 
 if [ -z "$CREDS_IV" ]; then
-    export CREDS_IV=$(head -c 16 /dev/urandom | xxd -p 2>/dev/null || cat /dev/urandom | tr -dc 'a-f0-9' | head -c 32)
+    export CREDS_IV=$(head -c 16 /dev/urandom | xxd -p 2>/dev/null || head -c 50 /dev/urandom | tr -dc 'a-f0-9' | head -c 32)
     echo "Generated CREDS_IV"
 fi
 
