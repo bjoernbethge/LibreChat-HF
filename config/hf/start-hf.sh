@@ -8,19 +8,30 @@ mkdir -p /app/logs /app/uploads /app/images /data/db 2>/dev/null || true
 chown -R 1000:1000 /data/db 2>/dev/null || true
 
 # Start MongoDB in background
+# Note: --noauth is used because this is an embedded instance only accessible via localhost
+# External access is not possible in the HF Spaces container environment
 echo "Starting embedded MongoDB..."
 mongod --dbpath /data/db --bind_ip 127.0.0.1 --port 27017 --fork --logpath /app/logs/mongodb.log --noauth
 
 # Wait for MongoDB to be ready
 echo "Waiting for MongoDB to start..."
-for i in 1 2 3 4 5 6 7 8 9 10; do
+MONGO_READY=0
+for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
     if mongosh --eval "db.adminCommand('ping')" --quiet 2>/dev/null; then
         echo "MongoDB is ready!"
+        MONGO_READY=1
         break
     fi
-    echo "Waiting... ($i/10)"
+    echo "Waiting... ($i/15)"
     sleep 2
 done
+
+if [ "$MONGO_READY" != "1" ]; then
+    echo "ERROR: MongoDB failed to start within 30 seconds!"
+    echo "Check /app/logs/mongodb.log for details"
+    cat /app/logs/mongodb.log 2>/dev/null || true
+    exit 1
+fi
 
 # Generate random secrets if not provided
 if [ -z "$JWT_SECRET" ]; then
@@ -56,5 +67,5 @@ fi
 echo "MongoDB running on localhost:27017"
 echo "Starting LibreChat on port ${PORT:-7860}..."
 
-# Start the application as user 1000
-exec su-exec 1000:1000 npm run backend || exec npm run backend
+# Start the application (runs as current user)
+exec npm run backend
