@@ -210,7 +210,7 @@ This setup includes these models via the free HF Inference API:
 | `Dockerfile.hf` | Optimized Dockerfile for HF Spaces |
 | `config/hf/librechat.hf.yaml` | Pre-configured with HF Inference API endpoints |
 | `config/hf/env.hf` | Environment template for HF Spaces |
-| `config/hf/start-hf.sh` | Startup script that initializes MongoDB and starts the app |
+| `config/hf/start-hf.sh` | Startup script with auto-generated secrets |
 
 ---
 
