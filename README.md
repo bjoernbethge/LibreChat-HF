@@ -27,6 +27,9 @@
 </p>
 
 <p align="center">
+<a href="https://huggingface.co/spaces/new?sdk=docker">
+  <img src="https://huggingface.co/datasets/huggingface/badges/resolve/main/deploy-to-spaces-lg.svg" alt="Deploy on Hugging Face Spaces" height="30">
+</a>
 <a href="https://railway.app/template/b5k2mn?referralCode=HI9hWz">
   <img src="https://railway.app/button.svg" alt="Deploy on Railway" height="30">
 </a>
@@ -144,6 +147,62 @@ With LibreChat, you no longer need to opt for ChatGPT Plus and can instead use f
 [![Watch the video](https://raw.githubusercontent.com/LibreChat-AI/librechat.ai/main/public/images/changelog/v0.7.6.gif)](https://www.youtube.com/watch?v=ilfwGQtJNlI)
 
 Click on the thumbnail to open the video☝️
+
+---
+
+## 🤗 Deploy on Hugging Face Spaces
+
+This fork is optimized for easy deployment on Hugging Face Spaces, perfect for the MCP Hackathon demo!
+
+### ✨ Simple Setup - No External Database Required!
+
+MongoDB runs embedded in the container - just add your HuggingFace token and you're ready to go!
+
+### Quick Start
+
+1. **Create a new Hugging Face Space**
+   - Go to [huggingface.co/spaces](https://huggingface.co/spaces) and click "Create new Space"
+   - Select **Docker** as the SDK
+   - Choose your Space name
+   - **Recommended:** Enable persistent storage in Space settings for data persistence
+
+2. **Clone and push this repository**
+   ```bash
+   git clone https://github.com/bjoernbethge/LibreChat-HF.git
+   cd LibreChat-HF
+   # Rename Dockerfile.hf to Dockerfile for HF Spaces
+   cp Dockerfile.hf Dockerfile
+   # Push to your HF Space
+   git remote add space https://huggingface.co/spaces/YOUR_USERNAME/YOUR_SPACE_NAME
+   git push space main
+   ```
+
+3. **Configure Secret** (Only 1 required!)
+   In your Space Settings → Secrets, add:
+   - `HUGGINGFACE_TOKEN`: Your HF API token ([get it here](https://huggingface.co/settings/tokens))
+   
+   That's it! All other secrets are auto-generated.
+
+4. **Access your Space**
+   Once built, your LibreChat instance will be available at:
+   `https://huggingface.co/spaces/YOUR_USERNAME/YOUR_SPACE_NAME`
+
+### Pre-configured Models (HF Inference API)
+
+This setup includes these models via the free HF Inference API:
+- 🦙 **Llama 3.1 8B Instruct** - Meta's latest instruction-tuned model
+- 🌬️ **Mistral 7B Instruct** - Fast and capable
+- 🔮 **Qwen 2.5 72B** - Powerful multilingual model
+- 💨 **Zephyr 7B** - Great for demos
+
+### Files for HF Spaces
+
+| File | Description |
+|------|-------------|
+| `Dockerfile.hf` | Optimized Dockerfile with embedded MongoDB |
+| `config/hf/librechat.hf.yaml` | Pre-configured with HF Inference API endpoints |
+| `config/hf/env.hf` | Environment template for HF Spaces |
+| `config/hf/start-hf.sh` | Startup script with MongoDB & auto-generated secrets |
 
 ---
 

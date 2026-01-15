@@ -1,0 +1,110 @@
+# Dockerfile.hf - Optimized for Hugging Face Spaces deployment
+# Use this Dockerfile to deploy LibreChat on Hugging Face Spaces
+# with the HF Inference API for the MCP Hackathon demo
+#
+# SIMPLE DEPLOYMENT - No external database required!
+# MongoDB runs embedded in the container with HF persistent storage.
+#
+# Deploy to HF Spaces:
+# 1. Create a new Space with Docker SDK
+# 2. Enable persistent storage in Space settings (recommended)
+# 3. Push this repo or copy files
+# 4. Add secret: HUGGINGFACE_TOKEN (your HF API token)
+#
+# HF Space README.md header:
+# ---
+# title: LibreChat
+# emoji: 💬
+# colorFrom: blue
+# colorTo: purple
+# sdk: docker
+# app_port: 7860
+# ---
+
+# Use Debian-based Node image for MongoDB compatibility
+FROM node:20-bookworm-slim AS base
+
+# Install MongoDB and required tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gnupg \
+    curl \
+    ca-certificates \
+    && curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor \
+    && echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] http://repo.mongodb.org/apt/debian bookworm/mongodb-org/7.0 main" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends mongodb-org-server mongodb-mongosh \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add `uv` for extended MCP support
+COPY --from=ghcr.io/astral-sh/uv:0.6.13 /uv /uvx /bin/
+
+# Create directories with proper permissions
+# HF Spaces mounts /data for persistent storage
+RUN mkdir -p /app /app/logs /app/uploads /app/images /data/db && \
+    chown -R 1000:1000 /app /data
+
+WORKDIR /app
+
+# Copy package files
+COPY --chown=1000:1000 package.json package-lock.json ./
+COPY --chown=1000:1000 api/package.json ./api/package.json
+COPY --chown=1000:1000 client/package.json ./client/package.json
+COPY --chown=1000:1000 packages/data-provider/package.json ./packages/data-provider/package.json
+COPY --chown=1000:1000 packages/data-schemas/package.json ./packages/data-schemas/package.json
+COPY --chown=1000:1000 packages/api/package.json ./packages/api/package.json
+COPY --chown=1000:1000 packages/client/package.json ./packages/client/package.json
+
+# Install dependencies
+RUN npm config set fetch-retry-maxtimeout 600000 && \
+    npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 15000 && \
+    npm ci --no-audit
+
+# Copy application files
+COPY --chown=1000:1000 . .
+
+# Copy HF-specific configuration files from config/hf directory
+COPY --chown=1000:1000 config/hf/env.hf /app/.env
+COPY --chown=1000:1000 config/hf/librechat.hf.yaml /app/librechat.yaml
+
+# Build frontend
+RUN NODE_OPTIONS="--max-old-space-size=2048" npm run frontend && \
+    npm prune --production && \
+    npm cache clean --force
+
+# Copy and setup the startup script
+COPY --chown=1000:1000 config/hf/start-hf.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
+# Expose port 7860 (Hugging Face Spaces default)
+EXPOSE 7860
+
+# Environment variables for Hugging Face Spaces
+ENV HOST=0.0.0.0
+ENV PORT=7860
+ENV NODE_ENV=production
+ENV CONFIG_PATH=/app/librechat.yaml
+
+# MongoDB runs embedded - uses /data for HF persistent storage
+ENV MONGO_URI=mongodb://127.0.0.1:27017/LibreChat
+
+# Disable search features that require MeiliSearch
+ENV SEARCH=false
+
+# Allow registration for demo purposes
+ENV ALLOW_REGISTRATION=true
+ENV ALLOW_EMAIL_LOGIN=true
+ENV ALLOW_UNVERIFIED_EMAIL_LOGIN=true
+
+# HF Spaces secret (set in Space settings):
+# - HUGGINGFACE_TOKEN: Your HF API token for Inference API
+#
+# Optional secrets (auto-generated if not set):
+# - JWT_SECRET: Secret for JWT tokens
+# - JWT_REFRESH_SECRET: Refresh token secret
+# - CREDS_KEY: Credentials encryption key
+# - CREDS_IV: Credentials encryption IV
+
+# Run as root to start MongoDB, then app runs with proper permissions
+CMD ["/app/start.sh"]

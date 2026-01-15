@@ -1,0 +1,101 @@
+# LibreChat Configuration for Hugging Face Spaces
+# Optimized for MCP Hackathon Demo with HF Inference API
+# 
+# Set your HUGGINGFACE_TOKEN in HF Spaces secrets!
+
+version: 1.2.1
+
+cache: true
+
+# Custom interface configuration for demo
+interface:
+  customWelcome: 'Welcome to LibreChat on Hugging Face Spaces! 🤗 This demo uses the HF Inference API.'
+  fileSearch: true
+  endpointsMenu: true
+  modelSelect: true
+  parameters: true
+  sidePanel: true
+  presets: true
+  prompts: true
+  bookmarks: true
+  multiConvo: true
+  agents: true
+
+# Registration settings - allow easy demo access
+registration:
+  socialLogins: []
+
+# Endpoint configuration for Hugging Face Inference API
+endpoints:
+  custom:
+    # Hugging Face Inference API - Meta Llama 3.1 8B
+    - name: 'HuggingFace'
+      apiKey: '${HUGGINGFACE_TOKEN}'
+      baseURL: 'https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3.1-8B-Instruct/v1'
+      models:
+        default:
+          - 'meta-llama/Meta-Llama-3.1-8B-Instruct'
+        fetch: false
+      titleConvo: true
+      titleModel: 'meta-llama/Meta-Llama-3.1-8B-Instruct'
+      modelDisplayLabel: 'Llama 3.1 8B (HF Inference)'
+      iconURL: https://huggingface.co/front/assets/huggingface_logo-noborder.svg
+
+    # Hugging Face Inference API - Mistral 7B
+    - name: 'Mistral-HF'
+      apiKey: '${HUGGINGFACE_TOKEN}'
+      baseURL: 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3/v1'
+      models:
+        default:
+          - 'mistralai/Mistral-7B-Instruct-v0.3'
+        fetch: false
+      titleConvo: true
+      titleModel: 'mistralai/Mistral-7B-Instruct-v0.3'
+      modelDisplayLabel: 'Mistral 7B (HF Inference)'
+      iconURL: https://huggingface.co/front/assets/huggingface_logo-noborder.svg
+
+    # Hugging Face Inference API - Qwen 2.5
+    - name: 'Qwen-HF'
+      apiKey: '${HUGGINGFACE_TOKEN}'
+      baseURL: 'https://api-inference.huggingface.co/models/Qwen/Qwen2.5-72B-Instruct/v1'
+      models:
+        default:
+          - 'Qwen/Qwen2.5-72B-Instruct'
+        fetch: false
+      titleConvo: true
+      titleModel: 'Qwen/Qwen2.5-72B-Instruct'
+      modelDisplayLabel: 'Qwen 2.5 72B (HF Inference)'
+      iconURL: https://huggingface.co/front/assets/huggingface_logo-noborder.svg
+
+    # Hugging Face Inference API - Zephyr 7B (good for demos)
+    - name: 'Zephyr-HF'
+      apiKey: '${HUGGINGFACE_TOKEN}'
+      baseURL: 'https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta/v1'
+      models:
+        default:
+          - 'HuggingFaceH4/zephyr-7b-beta'
+        fetch: false
+      titleConvo: true
+      titleModel: 'HuggingFaceH4/zephyr-7b-beta'
+      modelDisplayLabel: 'Zephyr 7B (HF Inference)'
+      iconURL: https://huggingface.co/front/assets/huggingface_logo-noborder.svg
+
+# MCP Servers Example Configuration (for hackathon demo)
+# Uncomment and configure based on your needs
+# mcpServers:
+#   filesystem:
+#     command: npx
+#     args:
+#       - -y
+#       - "@modelcontextprotocol/server-filesystem"
+#       - /app/uploads
+
+# File configuration
+fileConfig:
+  endpoints:
+    custom:
+      fileLimit: 5
+      fileSizeLimit: 10
+      totalSizeLimit: 50
+  serverFileSizeLimit: 100
+  avatarSizeLimit: 2
